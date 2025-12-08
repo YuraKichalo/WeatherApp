@@ -1,5 +1,5 @@
 import { UserLocation } from '@/hooks/useUserLocation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
     getCurrentWeatherByCity,
     getCurrentWeatherByLocation,
@@ -7,6 +7,7 @@ import {
     getForecastByLocation,
 } from '@/api/weatherApi';
 import { ErrorMessages } from '@/constants/strigns';
+import { useWeatherStore } from '@/store/useWeatherStore';
 
 interface WeatherLocation {
     name: string;
@@ -53,9 +54,7 @@ export interface WeatherData {
 }
 
 export function useWeather(location: UserLocation | null) {
-    const [weather, setWeather] = useState<WeatherData | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const { setError, setLoading, addWeatherItem, weatherItems } = useWeatherStore();
 
     useEffect(() => {
         if (location) {
@@ -74,7 +73,8 @@ export function useWeather(location: UserLocation | null) {
                         forecast: forecastResponse.data.forecast,
                     };
 
-                    setWeather(combinedData);
+                    // setWeather(combinedData);
+                    addWeatherItem(combinedData)
                 } catch (e) {
                     setError(ErrorMessages.failedToGetWeatherByLocation);
                 } finally {
@@ -90,7 +90,13 @@ export function useWeather(location: UserLocation | null) {
         setLoading(true);
         setError(null);
 
+        const itemAlreadyExists = weatherItems?.some((item) => item.location.name === city);
+
         try {
+            if (itemAlreadyExists) {
+                return;
+            }
+
             const [currentResponse, forecastResponse] = await Promise.all([
                 getCurrentWeatherByCity(city),
                 getForecastByCity(city),
@@ -101,7 +107,7 @@ export function useWeather(location: UserLocation | null) {
                 forecast: forecastResponse.data.forecast,
             };
 
-            setWeather(combinedData);
+            addWeatherItem(combinedData)
         } catch (e) {
             setError(ErrorMessages.failedToGetWeatherByCity);
         } finally {
@@ -109,5 +115,5 @@ export function useWeather(location: UserLocation | null) {
         }
     }
 
-    return { weather, loading, error, fetchWeatherByCity };
+    return { fetchWeatherByCity };
 }

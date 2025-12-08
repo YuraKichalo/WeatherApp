@@ -1,19 +1,43 @@
-import React from 'react'
-import { Image, StyleSheet, View } from 'react-native'
+import React, { useRef, useState } from 'react'
+import { Animated, Image, Pressable, StyleSheet, View } from 'react-native'
 import { WeatherData } from '@/hooks/useWeather';
 import { Text } from '@/components/Text';
 import { Colors } from '@/constants/colors';
 import { Typography } from '@/constants/typography';
 import { Spacing } from '@/constants/spacing';
 import { Strings } from '@/constants/strigns';
+import { Ionicons } from '@expo/vector-icons';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface WeatherCardProps {
     weather: WeatherData
 }
 
 export default function WeatherCard({ weather }: WeatherCardProps) {
+    const [deleteState, setDeleteState] = useState(false);
+    const shakeAnim = useRef(new Animated.Value(0)).current;
+
+    const startShake = () => {
+        Animated.sequence([
+            Animated.timing(shakeAnim, { toValue: 5, duration: 100, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: -5, duration: 100, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 5, duration: 100, useNativeDriver: true }),
+            Animated.timing(shakeAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
+        ]).start(() => {
+            setDeleteState((prevState) => !prevState);
+        });
+    };
+
     return (
-        <View style={styles.container}>
+        <AnimatedPressable style={[styles.container, { transform: [{ translateX: shakeAnim }] }]}
+                           onLongPress={startShake}
+                           android_ripple={{ color: Colors.secondary }}>
+            {deleteState && (
+                <Pressable style={styles.deleteIcon}>
+                    <Ionicons name="trash" size={24} color={Colors.background}/>
+                </Pressable>
+            )}
             <View>
                 <Text style={styles.temp}>{Math.round(weather.current.temp_c)}℃</Text>
                 <View style={styles.row}>
@@ -34,9 +58,9 @@ export default function WeatherCard({ weather }: WeatherCardProps) {
                     style={styles.image}
                     resizeMode="contain"
                 />
-                <Text>{weather?.current.condition.text}</Text>
+                <Text numberOfLines={0} style={styles.conditionText}>{weather?.current.condition.text}</Text>
             </View>
-        </View>
+        </AnimatedPressable>
     )
 }
 
@@ -47,6 +71,10 @@ const styles = StyleSheet.create({
         borderRadius: Spacing.lg,
         flexDirection: 'row',
         justifyContent: 'space-between',
+    },
+    conditionText: {
+        textAlign: 'right',
+        maxWidth: 100,
     },
     temp: {
         fontSize: Typography.sizes.xxxl,
@@ -73,6 +101,7 @@ const styles = StyleSheet.create({
     iconAndTextContainer: {
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
+        zIndex: -1,
     },
     location: {
         width: 200,
@@ -83,5 +112,10 @@ const styles = StyleSheet.create({
         width: 102,
         height: 102,
         flex: 1,
+    },
+    deleteIcon: {
+        position: 'absolute',
+        top: Spacing.md,
+        right: Spacing.md,
     },
 })

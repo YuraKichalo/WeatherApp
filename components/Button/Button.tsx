@@ -14,14 +14,17 @@ export const Button = ({
     title,
     titleStyle,
     buttonStyle,
+    disabled = false,
     ...pressableProps
 }: ButtonProps) => {
     return (
         <Pressable
+            disabled={disabled}
             style={({ pressed }) => [
                 styles.button,
                 buttonStyle,
                 pressed && styles.pressed,
+                disabled && styles.disabled,
             ]}
             {...pressableProps}
         >
@@ -43,6 +46,10 @@ const styles = StyleSheet.create({
     },
     pressed: {
         opacity: 0.7,
+    },
+    disabled: {
+        backgroundColor: Colors.text.disabled,
+        opacity: 0.5,
     },
     title: {
         color: Colors.text.secondary,

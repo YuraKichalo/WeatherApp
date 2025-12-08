@@ -11,13 +11,15 @@ import { Button } from '@/components/Button';
 import { Spacing } from '@/constants/spacing';
 import { Strings } from '@/constants/strigns';
 import WeatherCard from '@/components/WeatherCard/WeatherCard';
+import { useWeatherStore } from '@/store/useWeatherStore';
 
 const stringBase = Strings.weatherScreen
 
 export default function Weather() {
     const [value, setValue] = React.useState('');
     const { location, loading: locLoading, isBlocked, openSettings } = useUserLocation();
-    const { weather, loading: weatherLoading, error: weatherError, fetchWeatherByCity } = useWeather(location)
+    const { fetchWeatherByCity } = useWeather(location)
+    const { weatherItems, loading: weatherLoading } = useWeatherStore();
 
     const inputTextColor = value.length > 0 ? Colors.text.primary : Colors.text.disabled;
 
@@ -49,13 +51,22 @@ export default function Weather() {
                         onSubmitEditing={onSearch}
                     />
                 </View>
-                <Button title="search" buttonStyle={styles.searchButton} titleStyle={styles.searchButtonText}
+                <Button disabled={value.length === 0} title="search" buttonStyle={styles.searchButton}
+                        titleStyle={styles.searchButtonText}
                         onPress={onSearch}/>
             </View>
 
 
-            {weather && !weatherError && <WeatherCard weather={weather}/>}
+            {weatherItems && weatherItems.map((item, index) => {
+                const isLastItem = index === weatherItems.length - 1;
 
+                return (
+                    <React.Fragment key={item.location.name}>
+                        <WeatherCard weather={item}/>
+                        {!isLastItem && <View style={{ height: Spacing.xl }}/>}
+                    </React.Fragment>
+                )
+            })}
 
             {isBlocked && (
                 <View style={styles.centeredContainer}>
