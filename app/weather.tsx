@@ -1,5 +1,5 @@
-import React from 'react'
-import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native'
+import React, { useEffect } from 'react'
+import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
@@ -19,9 +19,30 @@ export default function Weather() {
     const [value, setValue] = React.useState('');
     const { location, loading: locLoading, isBlocked, openSettings } = useUserLocation();
     const { fetchWeatherByCity } = useWeather(location)
-    const { weatherItems, loading: weatherLoading } = useWeatherStore();
+    const {
+        weatherItems,
+        loading: weatherLoading,
+        deleteWeatherItem,
+        undoDelete,
+        clearLastDeleted,
+        lastDeleted,
+    } = useWeatherStore();
 
     const inputTextColor = value.length > 0 ? Colors.text.primary : Colors.text.disabled;
+
+    useEffect(() => {
+        if (lastDeleted) {
+            const timer = setTimeout(() => {
+                clearLastDeleted();
+            }, 5000);
+
+            return () => {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+            };
+        }
+    }, [lastDeleted, clearLastDeleted]);
 
     const onSearch = () => {
         fetchWeatherByCity(value)
@@ -57,21 +78,27 @@ export default function Weather() {
             </View>
 
 
-            {weatherItems && weatherItems.map((item, index) => {
-                const isLastItem = index === weatherItems.length - 1;
-
-                return (
-                    <React.Fragment key={item.location.name}>
-                        <WeatherCard weather={item}/>
-                        {!isLastItem && <View style={{ height: Spacing.xl }}/>}
-                    </React.Fragment>
-                )
-            })}
+            <FlatList
+                showsVerticalScrollIndicator={false}
+                data={weatherItems ?? []}
+                keyExtractor={(item) => item.location.name}
+                renderItem={({ item, index }) => (
+                    <WeatherCard weather={item} onDelete={() => deleteWeatherItem(index)}/>
+                )}
+                ItemSeparatorComponent={() => <View style={{ height: Spacing.md }}/>}
+            />
 
             {isBlocked && (
                 <View style={styles.centeredContainer}>
                     <Text style={styles.disableLocationText}>{stringBase.disabledLocation}</Text>
                     <Button title={stringBase.settingsButton} onPress={openSettings}/>
+                </View>
+            )}
+
+            {lastDeleted && (
+                <View style={styles.undoContainer}>
+                    <Text style={styles.undoText}>Weather card deleted</Text>
+                    <Button title="Undo" onPress={undoDelete} buttonStyle={styles.undoButton}/>
                 </View>
             )}
         </Screen>
@@ -81,6 +108,32 @@ export default function Weather() {
 const styles = StyleSheet.create({
     container: {
         paddingTop: Spacing.xxl,
+    },
+    undoContainer: {
+        position: 'absolute',
+        bottom: Spacing.lg,
+        left: Spacing.lg,
+        right: Spacing.lg,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: Colors.primary,
+        padding: Spacing.md,
+        borderRadius: Spacing.md,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    undoText: {
+        color: Colors.text.primary,
+        fontSize: Typography.sizes.md,
+    },
+    undoButton: {
+        backgroundColor: Colors.secondary,
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: Spacing.sm,
     },
     row: {
         flexDirection: 'row',
@@ -95,7 +148,7 @@ const styles = StyleSheet.create({
         fontSize: Typography.sizes.sm,
     },
     searchButton: {
-        borderRadius: 8,
+        borderRadius: Spacing.sm,
     },
     disableLocationText: {
         fontSize: Typography.sizes.xl,
@@ -104,14 +157,14 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.md,
     },
     inputContainer: {
-        marginEnd: 8,
+        marginEnd: Spacing.sm,
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: Colors.primary,
-        padding: 8,
-        borderRadius: 8,
-        shadowColor: '#000',
+        padding: Spacing.sm,
+        borderRadius: Spacing.sm,
+        shadowColor: Colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,

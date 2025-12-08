@@ -9,6 +9,7 @@ export const Colors = {
     error: '#FF3B30',
     success: '#34C759',
     warning: '#FF9500',
+    shadow: '#000000',
 
     // Text colors
     text: {

@@ -12,9 +12,10 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface WeatherCardProps {
     weather: WeatherData
+    onDelete: () => void
 }
 
-export default function WeatherCard({ weather }: WeatherCardProps) {
+export default function WeatherCard({ weather, onDelete }: WeatherCardProps) {
     const [deleteState, setDeleteState] = useState(false);
     const shakeAnim = useRef(new Animated.Value(0)).current;
 
@@ -34,7 +35,7 @@ export default function WeatherCard({ weather }: WeatherCardProps) {
                            onLongPress={startShake}
                            android_ripple={{ color: Colors.secondary }}>
             {deleteState && (
-                <Pressable style={styles.deleteIcon}>
+                <Pressable style={styles.deleteIcon} onPress={onDelete}>
                     <Ionicons name="trash" size={24} color={Colors.background}/>
                 </Pressable>
             )}
@@ -66,6 +67,7 @@ export default function WeatherCard({ weather }: WeatherCardProps) {
 
 const styles = StyleSheet.create({
     container: {
+        marginHorizontal: Spacing.xs,
         padding: Spacing.lg,
         backgroundColor: Colors.primary,
         borderRadius: Spacing.lg,

@@ -13,9 +13,10 @@ type WeatherStore = {
     deleteWeatherItem: (index: number) => void
 
     undoDelete: () => void
+    clearLastDeleted: () => void
 }
 
-export const useWeatherStore = create<WeatherStore>((set, get) => ({
+export const useWeatherStore = create<WeatherStore>((set) => ({
     weatherItems: [],
     lastDeleted: undefined,
     loading: false,
@@ -58,4 +59,7 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
             lastDeleted: undefined,
         };
     }),
+    clearLastDeleted: () => set(() => ({
+        lastDeleted: undefined,
+    })),
 }))
