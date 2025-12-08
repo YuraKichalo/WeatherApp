@@ -14,7 +14,9 @@ displays the weather data for their current location.
 
 ## Demo
 
-A demo video showcasing the features of the app is available locally on your Mac.
+https://github.com/user-attachments/assets/24819ce6-86d5-47dc-8d50-80914fa8c59e
+
+
 
 ## Features
 
