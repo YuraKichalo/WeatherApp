@@ -12,6 +12,7 @@ import { Spacing } from '@/constants/spacing';
 import { Strings } from '@/constants/strigns';
 import WeatherCard from '@/components/WeatherCard/WeatherCard';
 import { useWeatherStore } from '@/store/useWeatherStore';
+import Warning from '@/components/Warning/Warning';
 
 const stringBase = Strings.weatherScreen
 
@@ -26,6 +27,7 @@ export default function Weather() {
         undoDelete,
         clearLastDeleted,
         lastDeleted,
+        error: weatherError,
     } = useWeatherStore();
 
     const inputTextColor = value.length > 0 ? Colors.text.primary : Colors.text.disabled;
@@ -96,10 +98,12 @@ export default function Weather() {
             )}
 
             {lastDeleted && (
-                <View style={styles.undoContainer}>
-                    <Text style={styles.undoText}>Weather card deleted</Text>
-                    <Button title="Undo" onPress={undoDelete} buttonStyle={styles.undoButton}/>
-                </View>
+                <Warning textContent={stringBase.undoDeleteText} buttonText={stringBase.undo}
+                         onButtonPress={undoDelete}/>
+            )}
+
+            {!!weatherError && (
+                <Warning textContent={weatherError}/>
             )}
         </Screen>
     )
@@ -108,32 +112,6 @@ export default function Weather() {
 const styles = StyleSheet.create({
     container: {
         paddingTop: Spacing.xxl,
-    },
-    undoContainer: {
-        position: 'absolute',
-        bottom: Spacing.lg,
-        left: Spacing.lg,
-        right: Spacing.lg,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: Colors.primary,
-        padding: Spacing.md,
-        borderRadius: Spacing.md,
-        shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    undoText: {
-        color: Colors.text.primary,
-        fontSize: Typography.sizes.md,
-    },
-    undoButton: {
-        backgroundColor: Colors.secondary,
-        paddingHorizontal: Spacing.lg,
-        paddingVertical: Spacing.sm,
     },
     row: {
         flexDirection: 'row',

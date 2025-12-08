@@ -11,6 +11,8 @@ export const Strings = {
         inputPlaceholder: 'Search for a city',
         disabledLocation: 'Location is disabled. Enable it in Settings.',
         settingsButton: 'Open Settings',
+        undoDeleteText: 'Weather card deleted',
+        undo: 'Undo',
     },
     weatherCard: {
         minTemp: 'L:',
